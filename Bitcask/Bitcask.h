@@ -16,4 +16,4 @@ FOUNDATION_EXPORT const unsigned char BitcaskVersionString[];
 
 // In this header, you should import all the public headers of your framework using statements like #import <Bitcask/PublicHeader.h>
 
-
+#import <Bitcask/BitcaskDB.h>

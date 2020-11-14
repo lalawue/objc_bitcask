@@ -7,9 +7,13 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		2A1A5A592560279E007F563A /* DataFile.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A1A5A572560279E007F563A /* DataFile.h */; };
+		2A1A5A5A2560279E007F563A /* DataFile.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A1A5A582560279E007F563A /* DataFile.m */; };
 		2A8D7CD5255E6D7B000DB3EB /* Bitcask.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 2A8D7CCB255E6D7B000DB3EB /* Bitcask.framework */; };
 		2A8D7CDA255E6D7B000DB3EB /* BitcaskTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A8D7CD9255E6D7B000DB3EB /* BitcaskTests.m */; };
 		2A8D7CDC255E6D7B000DB3EB /* Bitcask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2A8D7CE7255E6DC2000DB3EB /* BitcaskDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		2A8D7CE8255E6DC2000DB3EB /* BitcaskDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -23,12 +27,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		2A1A5A572560279E007F563A /* DataFile.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = DataFile.h; sourceTree = "<group>"; };
+		2A1A5A582560279E007F563A /* DataFile.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = DataFile.m; sourceTree = "<group>"; };
 		2A8D7CCB255E6D7B000DB3EB /* Bitcask.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Bitcask.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bitcask.h; sourceTree = "<group>"; };
 		2A8D7CCF255E6D7B000DB3EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A8D7CD4255E6D7B000DB3EB /* BitcaskTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BitcaskTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		2A8D7CD9255E6D7B000DB3EB /* BitcaskTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BitcaskTests.m; sourceTree = "<group>"; };
 		2A8D7CDB255E6D7B000DB3EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BitcaskDB.h; sourceTree = "<group>"; };
+		2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BitcaskDB.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -73,6 +81,10 @@
 			children = (
 				2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */,
 				2A8D7CCF255E6D7B000DB3EB /* Info.plist */,
+				2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */,
+				2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */,
+				2A1A5A572560279E007F563A /* DataFile.h */,
+				2A1A5A582560279E007F563A /* DataFile.m */,
 			);
 			path = Bitcask;
 			sourceTree = "<group>";
@@ -94,6 +106,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				2A8D7CDC255E6D7B000DB3EB /* Bitcask.h in Headers */,
+				2A8D7CE7255E6DC2000DB3EB /* BitcaskDB.h in Headers */,
+				2A1A5A592560279E007F563A /* DataFile.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,6 +209,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2A8D7CE8255E6DC2000DB3EB /* BitcaskDB.m in Sources */,
+				2A1A5A5A2560279E007F563A /* DataFile.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
