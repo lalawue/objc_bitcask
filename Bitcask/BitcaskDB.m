@@ -60,6 +60,9 @@
     }
     [self removeObject:key];
     Bucket *bi = self.bucketInfo[self.bucketName];
+    if (!bi) {
+        return NO;
+    }
     fid_t dt = [bi activeFid:self];
     record_t r;
     r.ti = (uint32_t)time(NULL);
@@ -84,6 +87,9 @@
         return nil;
     }
     Bucket *bi = self.bucketInfo[self.bucketName];
+    if (!bi) {
+        return nil;
+    }
     Record *ri = bi.keyInfo[key];
     if (!ri) {
         return nil;
@@ -101,6 +107,9 @@
         return;
     }
     Bucket *bi = self.bucketInfo[self.bucketName];
+    if (!bi) {
+        return;
+    }
     Record *ri = bi.keyInfo[key];
     if (!ri) {
         return;
@@ -119,7 +128,16 @@
 }
 
 - (void)closeDB {
-    
+    for (NSString *bucketName in self.bucketInfo) {
+        Bucket *bi = self.bucketInfo[bucketName];
+        if (bi.df) {
+            [bi.df close];
+            bi.df = nil;
+        }
+    }
+    self.bucketInfo = @{}.mutableCopy;
+    self.bucketName = @"";
+    self.crc32 = nil;
 }
 
 #pragma mark - Internal

@@ -59,6 +59,9 @@
     [self sync];
     [self.fh closeFile];
     self.fh = nil;
+    if (self.offset <= 0) {
+        [[NSFileManager defaultManager] removeItemAtPath:self.path error:nil];
+    }
 }
 
 - (uint32_t)size {

@@ -89,8 +89,8 @@
 		2A8D7CCD255E6D7B000DB3EB /* Bitcask */ = {
 			isa = PBXGroup;
 			children = (
-				2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */,
 				2A8D7CCF255E6D7B000DB3EB /* Info.plist */,
+				2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */,
 				2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */,
 				2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */,
 				2AF7DEC12560DAFA007064B7 /* Bucket.h */,

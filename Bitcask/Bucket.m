@@ -43,9 +43,13 @@
 }
 
 - (fid_t)activeFid:(BitcaskDB *)db {
-    fid_t dt = {0, 0};
-    if (self.df != nil) {
+    fid_t dt = {self.actFid, 0};
+    if (self.df) {
         dt.offset = [self.df size];
+        if (dt.offset < [db getConfig].maxFileSize) {
+            return dt;
+        }
+        [self.df close];
     }
     // try free
     if (self.freeFids.count > 0) {
