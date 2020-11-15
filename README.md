@@ -4,7 +4,7 @@
 
 objc_bitcask was a Key/Value store for ObjC, uses [Bitcask](https://en.wikipedia.org/wiki/Bitcask)  on-disk layout.
 
-only test in MacOS/Linux.
+only test in MacOS.
 
 # Example
 
