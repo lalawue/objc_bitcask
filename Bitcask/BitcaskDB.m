@@ -7,37 +7,8 @@
 //
 
 #import "BitcaskDB.h"
-#import "DataFile.h"
-
-typedef struct {
-    uint32_t ti;
-    uint32_t fid;
-    uint32_t offset;
-    uint32_t ksize;
-    uint32_t vsize;
-    uint32_t crc32;
-} record_t;
-
-@interface Record : NSObject
-@property (nonatomic,assign) record_t record;
-@end
-
-@implementation Record
-@end
-
-#pragma mark -
-
-@interface Bucket : NSObject
-@property (nonatomic,copy) NSString *name; ///< bucket name
-@property (nonatomic,assign) uint32_t actFid; ///< active file id
-@property (nonatomic,assign) uint32_t maxFid; ///< max file id
-@property (nonatomic,strong) NSMutableDictionary<NSString*,Record*> *keyInfo; ///< key value map
-@end
-
-@implementation Bucket
-@end
-
-#pragma mark -
+#import "Bucket.h"
+#import "CRC32Data.h"
 
 @implementation BitcaskConfig
 @end
@@ -46,6 +17,7 @@ typedef struct {
 @property (nonatomic,copy) NSString *bucketName;
 @property (nonatomic,strong) BitcaskConfig *config; ///< db config
 @property (nonatomic,strong) NSMutableDictionary<NSString*,Bucket*> *bucketInfo; ///< bucket map
+@property (nonatomic,strong) CRC32Data *crc32;
 @end
 
 @implementation BitcaskDB
@@ -56,31 +28,90 @@ typedef struct {
     }
     [BitcaskDB validateBitcaskConfig:config];
     BitcaskDB *db = [[BitcaskDB alloc] init];
+    db.crc32 = [CRC32Data createCRC32Data];
     db.config = config;
     db.bucketInfo = [[NSMutableDictionary alloc] init];
     if (![db loadBucketsInfo:config]) {
         return nil;
     }
-    if (![db loadKeysInfo:config]) {
-        return nil;
-    }
+    [db loadKeysInfo:config];
     return db;
 }
 
-- (bool)changeBucket:(NSString *)name {
-    return NO;
+- (BOOL)changeBucket:(NSString *)name {
+    if (name.length <= 0) {
+        return NO;
+    }
+    if ([self.bucketName isEqualToString:name]) {
+        return YES;
+    }
+    Bucket *bi = self.bucketInfo[name];
+    if (!bi) {
+        bi = [Bucket createBucket:name maxFid:0 path:self.config.path];
+        self.bucketInfo[name] = bi;
+    }
+    self.bucketName = name;
+    return YES;
 }
 
-- (bool)setObject:(NSData *)object withKey:(NSString *)key {
-    return NO;
+- (BOOL)setObject:(NSData *)object withKey:(NSString *)key {
+    if (object==nil || key.length<=0) {
+        return NO;
+    }
+    [self removeObject:key];
+    Bucket *bi = self.bucketInfo[self.bucketName];
+    fid_t dt = [bi activeFid:self];
+    record_t r;
+    r.ti = (uint32_t)time(NULL);
+    r.fid = dt.fid;
+    r.offset = dt.offset;
+    r.ksize = (uint32_t)key.length;
+    r.vsize = (uint32_t)object.length;
+    NSMutableData *mdata = [NSMutableData dataWithData:object];
+    [mdata appendData:[key dataUsingEncoding:NSStringEncodingConversionAllowLossy]];
+    r.crc32 = [self.crc32 crc32Data:mdata];
+    Record *ri = [[Record alloc] init];
+    ri.r = r;
+    BOOL ret = [bi writeRecord:ri key:key value:object];
+    if (ret) {
+        bi.keyInfo[key] = ri;
+    }
+    return ret;
 }
 
 - (NSData *)getObject:(NSString *)key {
-    return nil;
+    if (key.length <= 0) {
+        return nil;
+    }
+    Bucket *bi = self.bucketInfo[self.bucketName];
+    Record *ri = bi.keyInfo[key];
+    if (!ri) {
+        return nil;
+    }
+    DataFile *df = [DataFile openDataFileWith:ri.r.fid path:[self fidPath:ri.r.fid bucketName:bi.name] readonly:YES];
+    Record *rr = [bi readRecord:df offset:ri.r.offset readValue:YES];
+    if (df) {
+        [df close];
+    }
+    return rr.value;
 }
 
-- (id)removeObject:(NSString *)key {
-    return nil;
+- (void)removeObject:(NSString *)key {
+    if (key.length <= 0) {
+        return;
+    }
+    Bucket *bi = self.bucketInfo[self.bucketName];
+    Record *ri = bi.keyInfo[key];
+    if (!ri) {
+        return;
+    }
+    record_t r = ri.r;
+    r.vsize = 0; // mark delete
+    ri.r = r;
+    [bi activeFid:self];
+    if ([bi writeRecord:ri key:key value:nil]) {
+        [bi.keyInfo removeObjectForKey:key];
+    }
 }
 
 - (void)gc:(NSString *)name {
@@ -122,49 +153,53 @@ typedef struct {
             }
             NSArray *fileList = [fs contentsOfDirectoryAtPath:bucketPath error:nil];
             if (fileList == nil) {
-                self.bucketInfo[dirName] = [self _createBucket:dirName maxFid:0];
+                self.bucketInfo[dirName] = [Bucket createBucket:dirName maxFid:0 path:self.config.path];
             }
             uint32_t maxFid = 0;
             for (NSString *filePath in fileList) {
-                NSString *fidString = [filePath substringWithRange:NSMakeRange(filePath.length - 14, 9)];
+                NSString *fidString = [filePath substringWithRange:NSMakeRange(0, 9)];
                 uint32_t fid = (uint32_t)fidString.integerValue;
                 if (fid > maxFid) {
                     maxFid = fid;
                 }
             }
-            self.bucketInfo[dirName] = [self _createBucket:dirName maxFid:maxFid];
+            self.bucketInfo[dirName] = [Bucket createBucket:dirName maxFid:maxFid path:self.config.path];
         }
     }
     if (!self.bucketInfo[config.bucketName]) {
-        self.bucketInfo[config.bucketName] = [self _createBucket:config.bucketName maxFid:0];
+        self.bucketInfo[config.bucketName] = [Bucket createBucket:config.bucketName maxFid:0 path:self.config.path];
     }
     self.bucketName = config.bucketName;
     return YES;
 }
 
-- (BOOL)loadKeysInfo:(BitcaskConfig *)config {
-    return NO;
-}
-
-- (Bucket *)_createBucket:(NSString *)name maxFid:(uint32_t)maxFid {
-    BOOL isDir = NO;
-    NSString *path = [self.config.path stringByAppendingPathComponent:name];
-    if (![[NSFileManager defaultManager] fileExistsAtPath:path isDirectory:&isDir]) {
-        [[NSFileManager defaultManager] createDirectoryAtPath:path
-                                  withIntermediateDirectories:YES
-                                                   attributes:nil
-                                                        error:nil];
+- (void)loadKeysInfo:(BitcaskConfig *)config {
+    for (NSString *bucketName in self.bucketInfo) {
+        @autoreleasepool {
+            Bucket *bi = self.bucketInfo[bucketName];
+            for (uint32_t fid = 0; fid <= bi.maxFid; fid++) {
+                DataFile *df = [DataFile openDataFileWith:fid path:[self fidPath:fid bucketName:bi.name] readonly:YES];
+                if (df == nil) {
+                    [bi.freeFids addObject:@(fid)];
+                    continue;
+                }
+                uint32_t offset = 0;
+                while (YES) {
+                    Record *ri = [bi readRecord:df offset:offset readValue:NO];
+                    if (ri == nil) {
+                        break;
+                    }
+                    if (ri.r.vsize > 0) {
+                        bi.keyInfo[ri.key] = ri;
+                    } else {
+                        [bi.keyInfo removeObjectForKey:ri.key];
+                    }
+                    offset += [ri size];
+                }
+                [df close];
+            }
+        }
     }
-    Bucket *bucket = [[Bucket alloc] init];
-    bucket.name = name;
-    bucket.maxFid = maxFid;
-    bucket.keyInfo = @{}.mutableCopy;
-    return bucket;
-}
-
-- (NSString *)_fidPath:(uint32_t)fid bucketName:(NSString *)bucketName {
-    bucketName = bucketName.length > 0 ? bucketName : self.bucketName;
-    return [NSString stringWithFormat:@"%@/%@/%09u", self.config.path, bucketName, fid];
 }
 
 + (void)validateBitcaskConfig:(BitcaskConfig *)config {
@@ -178,6 +213,15 @@ typedef struct {
     if(config.bucketName.length <= 0) {
         config.bucketName = @"0";
     }
+}
+
+- (NSString *)fidPath:(uint32_t)fid bucketName:(NSString *)bucketName {
+    bucketName = bucketName.length > 0 ? bucketName : self.bucketName;
+    return [NSString stringWithFormat:@"%@/%@/%09u.dat", self.config.path, bucketName, fid];
+}
+
+- (BitcaskConfig *)getConfig {
+    return self.config;
 }
 
 @end

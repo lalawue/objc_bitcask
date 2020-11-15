@@ -10,7 +10,7 @@
 
 @interface DataFile : NSObject
 
-+ (instancetype)createDataFileWith:(uint32_t)fid path:(NSString *)path readonly:(BOOL)readonly;
++ (instancetype)openDataFileWith:(uint32_t)fid path:(NSString *)path readonly:(BOOL)readonly;
 
 - (uint32_t)fileID;
 - (void)sync;

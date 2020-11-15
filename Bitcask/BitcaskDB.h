@@ -14,11 +14,11 @@
 
 /** change bucket
  */
-- (bool)changeBucket:(NSString *)name;
+- (BOOL)changeBucket:(NSString *)name;
 
 /** set object with key
  */
-- (bool)setObject:(NSData *)object withKey:(NSString *)key;
+- (BOOL)setObject:(NSData *)object withKey:(NSString *)key;
 
 /** get object with key
  */
@@ -26,7 +26,7 @@
 
 /** remove object with key
  */
-- (id)removeObject:(NSString *)key;
+- (void)removeObject:(NSString *)key;
 
 /** collect bucket name
  */
@@ -38,6 +38,8 @@
 
 @end
 
+#pragma mark -
+
 /** bitcask database config
  */
 @interface BitcaskConfig : NSObject
@@ -45,6 +47,8 @@
 @property (nonatomic, copy) NSString *bucketName; ///< default '0'
 @property (nonatomic, assign) NSInteger maxFileSize; ///< default 64*1024*1024
 @end
+
+#pragma mark -
 
 /** bitcask database open
  */

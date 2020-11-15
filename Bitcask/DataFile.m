@@ -20,7 +20,7 @@
 
 @implementation DataFile
 
-+ (instancetype)createDataFileWith:(uint32_t)fid path:(NSString *)path readonly:(BOOL)readonly {
++ (instancetype)openDataFileWith:(uint32_t)fid path:(NSString *)path readonly:(BOOL)readonly {
     struct stat st;
     st.st_size = 0;
     st.st_mtimespec.tv_sec = 0;

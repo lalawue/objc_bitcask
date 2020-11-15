@@ -14,6 +14,11 @@
 		2A8D7CDC255E6D7B000DB3EB /* Bitcask.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A8D7CCE255E6D7B000DB3EB /* Bitcask.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2A8D7CE7255E6DC2000DB3EB /* BitcaskDB.h in Headers */ = {isa = PBXBuildFile; fileRef = 2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		2A8D7CE8255E6DC2000DB3EB /* BitcaskDB.m in Sources */ = {isa = PBXBuildFile; fileRef = 2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */; };
+		2AF7DEBF2560D796007064B7 /* CRC32Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 2AF7DEBD2560D795007064B7 /* CRC32Data.h */; };
+		2AF7DEC02560D796007064B7 /* CRC32Data.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AF7DEBE2560D796007064B7 /* CRC32Data.m */; };
+		2AF7DEC32560DAFA007064B7 /* Bucket.h in Headers */ = {isa = PBXBuildFile; fileRef = 2AF7DEC12560DAFA007064B7 /* Bucket.h */; };
+		2AF7DEC42560DAFA007064B7 /* Bucket.m in Sources */ = {isa = PBXBuildFile; fileRef = 2AF7DEC22560DAFA007064B7 /* Bucket.m */; };
+		2AF7DECC2560DFCE007064B7 /* BitcaskDB_Private.h in Headers */ = {isa = PBXBuildFile; fileRef = 2AF7DECB2560DFCE007064B7 /* BitcaskDB_Private.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -37,6 +42,11 @@
 		2A8D7CDB255E6D7B000DB3EB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BitcaskDB.h; sourceTree = "<group>"; };
 		2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = BitcaskDB.m; sourceTree = "<group>"; };
+		2AF7DEBD2560D795007064B7 /* CRC32Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CRC32Data.h; sourceTree = "<group>"; };
+		2AF7DEBE2560D796007064B7 /* CRC32Data.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = CRC32Data.m; sourceTree = "<group>"; };
+		2AF7DEC12560DAFA007064B7 /* Bucket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Bucket.h; sourceTree = "<group>"; };
+		2AF7DEC22560DAFA007064B7 /* Bucket.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Bucket.m; sourceTree = "<group>"; };
+		2AF7DECB2560DFCE007064B7 /* BitcaskDB_Private.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = BitcaskDB_Private.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,8 +93,13 @@
 				2A8D7CCF255E6D7B000DB3EB /* Info.plist */,
 				2A8D7CE5255E6DC2000DB3EB /* BitcaskDB.h */,
 				2A8D7CE6255E6DC2000DB3EB /* BitcaskDB.m */,
+				2AF7DEC12560DAFA007064B7 /* Bucket.h */,
+				2AF7DEC22560DAFA007064B7 /* Bucket.m */,
 				2A1A5A572560279E007F563A /* DataFile.h */,
 				2A1A5A582560279E007F563A /* DataFile.m */,
+				2AF7DEBD2560D795007064B7 /* CRC32Data.h */,
+				2AF7DEBE2560D796007064B7 /* CRC32Data.m */,
+				2AF7DECB2560DFCE007064B7 /* BitcaskDB_Private.h */,
 			);
 			path = Bitcask;
 			sourceTree = "<group>";
@@ -105,9 +120,12 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AF7DECC2560DFCE007064B7 /* BitcaskDB_Private.h in Headers */,
+				2AF7DEC32560DAFA007064B7 /* Bucket.h in Headers */,
 				2A8D7CDC255E6D7B000DB3EB /* Bitcask.h in Headers */,
 				2A8D7CE7255E6DC2000DB3EB /* BitcaskDB.h in Headers */,
 				2A1A5A592560279E007F563A /* DataFile.h in Headers */,
+				2AF7DEBF2560D796007064B7 /* CRC32Data.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -209,6 +227,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				2AF7DEC02560D796007064B7 /* CRC32Data.m in Sources */,
+				2AF7DEC42560DAFA007064B7 /* Bucket.m in Sources */,
 				2A8D7CE8255E6DC2000DB3EB /* BitcaskDB.m in Sources */,
 				2A1A5A5A2560279E007F563A /* DataFile.m in Sources */,
 			);
