@@ -124,7 +124,20 @@
 }
 
 - (void)gc:(NSString *)name {
-    
+    if (name.length <= 0) {
+        return;
+    }
+    Bucket *bi = self.bucketInfo[name];
+    if (!bi) {
+        return;
+    }
+    NSMutableDictionary *fidMap = [[NSMutableDictionary alloc] init];
+    [self collectDeletedRecordInfo:bi fidMap:fidMap];
+    if (fidMap.count > 0) {
+        [self mergeRecordInfos:bi fidMap:fidMap];
+    }
+    [bi writeBucketInfo:self name:name];
+    [bi.df sync];
 }
 
 - (void)closeDB {
@@ -217,6 +230,108 @@
                 [df close];
             }
         }
+    }
+}
+
+- (void)collectDeletedRecordInfo:(Bucket *)bi fidMap:(NSMutableDictionary<NSNumber*,NSMutableArray<Record*>*> *)fidMap {
+    uint32_t lastTime = [bi readBucketInfo:self name:bi.name];
+    for (uint32_t fid = 0; fid<=bi.maxFid; fid++) {
+        DataFile *df = [DataFile openDataFileWith:fid path:[self fidPath:fid bucketName:bi.name] readonly:YES];
+        if ([df modTime] < lastTime) {
+            [df close];
+            continue;
+        }
+        uint32_t offset = 0;
+        while (YES) {
+            Record *rmri = [bi readRecord:df offset:offset readValue:NO];
+            if (!rmri) {
+                break;
+            }
+            if (rmri.r.vsize == 0) {
+                // delete origin fid
+                NSNumber *fidKey = @(rmri.r.fid);
+                NSMutableArray<Record *> *riArr = fidMap[fidKey];
+                if (!riArr) {
+                    riArr = [[NSMutableArray alloc] init];
+                    fidMap[fidKey] = riArr;
+                }
+                record_t r = rmri.r;
+                {
+                    Record *ri = [[Record alloc] init];
+                    ri.r = r;
+                    [riArr addObject:ri];
+                }
+                // delete rm fid
+                fidKey = @(fid);
+                riArr = fidMap[fidKey];
+                if (!riArr) {
+                    riArr = [[NSMutableArray alloc] init];
+                    fidMap[fidKey] = riArr;
+                }
+                r.fid = fid;
+                r.offset = offset;
+                rmri.r = r;
+                [riArr addObject:rmri];
+            }
+            offset = offset + sizeof(record_t) + rmri.r.ksize + rmri.r.vsize;
+        }
+        [df close];
+    }
+}
+
+typedef BOOL(^CheckFidOffsetBlock)(NSMutableArray<Record*>*, uint32_t, uint32_t);
+
+- (void)mergeRecordInfos:(Bucket *)bi fidMap:(NSMutableDictionary<NSNumber*,NSMutableArray<Record*>*> *)fidMap {
+    // check whether in list
+    CheckFidOffsetBlock isInListBlk = ^(NSMutableArray<Record*> *riArr, uint32_t fid, uint32_t offset) {
+        int idx = -1;
+        for (int i=0; i<riArr.count; i++) {
+            Record *ri = riArr[i];
+            if (ri.r.fid == fid && ri.r.offset == offset) {
+                idx = i;
+                break;
+            }
+        }
+        if (idx >= 0) {
+            [riArr removeObjectAtIndex:idx];
+            return YES;
+        }
+        return NO;
+    };
+    // first increase active fid
+    [bi nextActFid:self];
+    NSMutableDictionary<NSString*, Record*> *keyInfo = bi.keyInfo;
+    for (NSNumber *inFidNum in fidMap) {
+        uint32_t inFid = (uint32_t)inFidNum.unsignedIntValue;
+        NSMutableArray<Record *> *inLst = fidMap[inFidNum];
+        NSString *inPath = [self fidPath:inFid bucketName:bi.name];
+        DataFile *inDf = [DataFile openDataFileWith:inFid path:inPath readonly:YES];
+        BOOL hasSkip = NO;
+        for (uint32_t inOffset = 0; ;) {
+            Record *inri = [bi readRecord:inDf offset:inOffset readValue:YES];
+            if (!inri) {
+                break;
+            }
+            if (isInListBlk(inLst, inFid, inOffset)) {
+                hasSkip = YES;
+            } else {
+                fid_t dt = [bi activeFid:self];
+                record_t r = inri.r;
+                r.fid = dt.fid;
+                r.offset = dt.offset;
+                inri.r = r;
+                if ([bi writeRecord:inri key:inri.key value:inri.value]) {
+                    keyInfo[inri.key] = inri;
+                    inri.key = nil; // release key/value
+                    inri.value = nil;
+                }
+            }
+            inOffset = inOffset + sizeof(record_t) + inri.r.ksize + inri.r.vsize;
+        }
+        if (hasSkip) {
+            [[NSFileManager defaultManager] removeItemAtPath:inPath error:nil];
+        }
+        [bi.freeFids addObject:inFidNum];
     }
 }
 
